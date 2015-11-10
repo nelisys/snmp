@@ -1,0 +1,18 @@
+{
+    "name": "nelisys/snmp",
+    "description": "PHP Class for net-snmp commands",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "nelisys",
+            "email": "nelisys@users.noreply.github.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Nelisys\\": "src/"
+        }
+    }
+}
