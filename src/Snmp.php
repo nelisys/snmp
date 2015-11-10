@@ -17,13 +17,6 @@ namespace Nelisys;
 class Snmp {
 
     /**
-     * Path to snmp commands.
-     */
-    protected $snmpget     = '/usr/bin/snmpget';
-    protected $snmpgetnext = '/usr/bin/snmpgetnext';
-    protected $snmpwalk    = '/usr/bin/snmpwalk';
-
-    /**
      * SNMP Agent's hostname
      */
     protected $hostname;
@@ -122,7 +115,8 @@ class Snmp {
         $snmpwalk = 'snmpwalk ' . escapeshellarg($this->hostname)
                        . ' -c ' . escapeshellarg($this->community)
                        . ' -v ' . escapeshellarg($this->version)
-                       . ' -O ' . escapeshellarg($this->output_options);
+                       . ' -O ' . escapeshellarg($this->output_options)
+                       . ' -Cc ';
 
         exec("$snmpwalk $oid 2>&1", $exec_output, $exec_return);
 
@@ -163,10 +157,16 @@ class Snmp {
         for ($i=0; $i<count($exec_output); $i++) {
             $tok = strtok($exec_output[$i], ' ');
 
-            if ( preg_match('/^\.1\.3\.6\./', $tok) ) {
+            if ( preg_match('/^\.1\./', $tok) ) {
                 $oid = $tok;
-                $value = ltrim(str_replace($oid, '', $exec_output[$i]));
-                $_ret[$oid] = $value;
+                $value = str_replace('"', '', ltrim(str_replace($oid, '', $exec_output[$i])));
+
+                if ($value == 'No Such Object available on this agent at this OID'
+                    || $value == 'No Such Instance currently exists at this OID') {
+                    $_ret[$oid] = '';
+                } else {
+                    $_ret[$oid] = $value;
+                }
             } elseif ( isset($oid) ) {
                 $_ret[$oid] .= "\n" . $exec_output[$i];
             }
